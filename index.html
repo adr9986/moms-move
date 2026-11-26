@@ -67,6 +67,10 @@ h2{font-size:26px;margin:0 0 6px;line-height:1.15}
 .card:not(.sl) .dot.num{width:14px;height:14px}
 .desc{margin:0 0 12px;font-size:16px}
 .card.sl{border-width:2px}
+.nt{margin-top:10px;border-radius:10px;padding:10px 12px;background:light-dark(#f1f5f2,#183229)}
+.nt h4{margin:0 0 2px;font-size:15px}
+.nt p{margin:0;font-size:15px}
+.nt .empty{color:var(--muted);font-style:italic}
 .notes{margin-top:8px;border:1.5px dashed var(--line);border-radius:10px;padding:10px 12px;color:var(--muted);font-size:15px}
 .card a{color:var(--sea);font-weight:600}
 footer{color:var(--muted);font-size:13px}
@@ -105,7 +109,7 @@ footer{color:var(--muted);font-size:13px}
 <p class="sub">Tap a card to find it on the map. Distances are straight lines to downtown Seattle and to Alec's office; driving takes longer.</p>
 <div class="offcard" id="offcard" tabindex="0"><svg viewBox="0 0 24 24"><path d="M12 2l3 6.5 7 .8-5.2 4.8 1.5 7L12 17.5 5.7 21.1l1.5-7L2 9.3l7-.8z" fill="#ffd24a" stroke="#10241c" stroke-width="1.2"/></svg><div><p><strong>Alec's office</strong></p><p style="color:var(--muted);font-size:15px">17544 Midvale Ave N, Shoreline, WA · <a href="https://maps.apple.com/?q=17544+Midvale+Ave+N,+Shoreline,+WA">Open in Maps</a></p></div></div>
 <div class="cards" id="cards"></div>
-<footer><p>Map imagery: Esri, Maxar, Earthstar Geographics. Pin locations are approximate. Notes for each area will be added here.</p></footer>
+<footer><p>Map imagery: Esri, Maxar, Earthstar Geographics. Pin locations are approximate. </p></footer>
 </div></section>
 <script>
 {
@@ -128,6 +132,14 @@ const A=[
 const B={n:47.925,s:47.375,w:-122.43,e:-122.075},my=l=>{const r=l*Math.PI/180;return Math.log(Math.tan(r)+1/Math.cos(r))};
 const px=(lat,lng)=>({x:(lng-B.w)/(B.e-B.w)*100,y:(my(B.n)-my(lat))/(my(B.n)-my(B.s))*100});
 A.forEach(a=>Object.assign(a,px(a.lat,a.lng)));
+/* Notes: fill in alec / molly for each area id. Use \n for a new line. */
+const N={
+wseattle:{alec:'',molly:''},edmonds:{alec:'',molly:''},uqa:{alec:'',molly:''},bothell:{alec:'',molly:''},
+ebellevue:{alec:'',molly:''},redmond:{alec:'',molly:''},seattle:{alec:'',molly:''},shoreline:{alec:'',molly:''},
+lfp:{alec:'',molly:''},kenmore:{alec:'',molly:''},lynnwood:{alec:'',molly:''},millcreek:{alec:'',molly:''},
+woodinville:{alec:'',molly:''},kirkland:{alec:'',molly:''},mercer:{alec:'',molly:''}};
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c]);
+const note=s=>s?`<p>${esc(s).replace(/\n/g,'<br>')}</p>`:'<p class="empty">Coming soon</p>';
 const C={city:'var(--city)',north:'var(--north)',east:'var(--east)',south:'var(--south)'};
 const GN={city:'Seattle',north:'North end',east:'Eastside',south:'South end'};
 const OF=Object.assign({lat:47.7571,lng:-122.344},px(47.7571,-122.344));
@@ -139,7 +151,7 @@ const f=v=>v<1?'under 1 mi':v.toFixed(0)+' mi';
 const AP=[{id:'sea',n:'Sea-Tac Airport (SEA)',lat:47.4502,lng:-122.3088},{id:'pae',n:'Paine Field Airport (PAE)',lat:47.9063,lng:-122.2816}].map(a=>Object.assign(a,px(a.lat,a.lng)));
 cv.insertAdjacentHTML('beforeend',AP.map(a=>`<div class="air" style="left:${a.x}%;top:${a.y}%"><svg viewBox="0 0 24 24"><path d="M21 16v-2l-8-5V3.5a1.5 1.5 0 0 0-3 0V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5z" fill="#fff"/></svg><b>${a.n}</b></div>`).join(''));
 const near=(a)=>{const s=mi(a.lat,a.lng,AP[0].lat,AP[0].lng),p=mi(a.lat,a.lng,AP[1].lat,AP[1].lng);return s<=p?`Sea-Tac, ${f(s)}`:`Paine Field, ${f(p)}`};
-cards.innerHTML=A.map(a=>{const d=a.id==='seattle'?'—':mi(a.lat,a.lng,47.6062,-122.3321).toFixed(0)+' mi',o=f(mi(a.lat,a.lng,OF.lat,OF.lng));return `<article class="card${a.k?' sl':''}" id="c-${a.id}" data-id="${a.id}" data-g="${a.g}" tabindex="0"><h3><span class="dot num" style="background:${C[a.g]}">${a.k||''}</span>${a.n}</h3><p class="meta">${a.k?'On the shortlist · ':''}${GN[a.g]} · ${a.c}</p>${a.d?`<p class="desc">${a.d}</p>`:''}<div class="row"><span>To downtown Seattle</span><span>${d}</span></div><div class="row"><span>To Alec's office</span><span>${o}</span></div><div class="row"><span>Closest airport</span><span>${near(a)}</span></div><div class="row"><span>Rent &amp; prices</span><span>Coming soon</span></div><div class="notes">Notes coming soon</div><p style="margin:10px 0 0;font-size:15px"><a href="https://maps.apple.com/?q=${encodeURIComponent(a.n+', WA')}">Open in Maps</a></p></article>`}).join('');
+cards.innerHTML=A.map(a=>{const d=a.id==='seattle'?'—':mi(a.lat,a.lng,47.6062,-122.3321).toFixed(0)+' mi',o=f(mi(a.lat,a.lng,OF.lat,OF.lng));return `<article class="card${a.k?' sl':''}" id="c-${a.id}" data-id="${a.id}" data-g="${a.g}" tabindex="0"><h3><span class="dot num" style="background:${C[a.g]}">${a.k||''}</span>${a.n}</h3><p class="meta">${a.k?'On the shortlist · ':''}${GN[a.g]} · ${a.c}</p>${a.d?`<p class="desc">${a.d}</p>`:''}<div class="row"><span>To downtown Seattle</span><span>${d}</span></div><div class="row"><span>To Alec's office</span><span>${o}</span></div><div class="row"><span>Closest airport</span><span>${near(a)}</span></div><div class="row"><span>Rent &amp; prices</span><span>Coming soon</span></div><div class="nt"><h4>Alec's notes</h4>${note(N[a.id]?.alec)}</div><div class="nt"><h4>Molly's notes</h4>${note(N[a.id]?.molly)}</div><p style="margin:10px 0 0;font-size:15px"><a href="https://maps.apple.com/?q=${encodeURIComponent(a.n+', WA')}">Open in Maps</a></p></article>`}).join('');
 let z=1;const Z=[1,1.6,2.4,3.4];
 function setZ(nz,cx,cy){const w0=cv.offsetWidth,fx=(vp.scrollLeft+(cx??vp.clientWidth/2))/w0,fy=(vp.scrollTop+(cy??vp.clientHeight/2))/cv.offsetHeight;z=Math.max(0,Math.min(Z.length-1,nz));cv.style.transition='none';cv.style.width=Z[z]*100+'%';cv.classList.toggle('z',z>0);vp.scrollLeft=fx*cv.offsetWidth-(cx??vp.clientWidth/2);vp.scrollTop=fy*cv.offsetHeight-(cy??vp.clientHeight/2)}
 document.getElementById('zin').onclick=()=>setZ(z+1);
