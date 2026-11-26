@@ -91,7 +91,6 @@ footer{color:var(--muted);font-size:13px}
 <p>Six shortlisted neighborhoods (numbered pins) plus other nearby towns, from Mill Creek down to Sea-Tac. The yellow star is Alec's office in Shoreline, and the blue plane pins are Sea-Tac and Paine Field airports. Scroll around the map, zoom in with the + button, and tap any pin to jump to its card below.</p>
 <div class="tools" id="filters" role="group" aria-label="Show areas">
 <button class="chip" aria-pressed="true" data-g="all">All areas</button>
-<button class="chip" aria-pressed="false" data-g="short">Shortlist (6)</button>
 <button class="chip" aria-pressed="false" data-g="city"><i style="background:var(--city)"></i>Seattle</button>
 <button class="chip" aria-pressed="false" data-g="north"><i style="background:var(--north)"></i>North end</button>
 <button class="chip" aria-pressed="false" data-g="east"><i style="background:var(--east)"></i>Eastside</button>
@@ -146,7 +145,7 @@ A.forEach(a=>Object.assign(a,px(a.lat,a.lng)));
 /* Notes: fill in alec / molly for each area id. Use \n for a new line. */
 const N={
 wseattle:{alec:'',molly:''},edmonds:{alec:'',molly:''},uqa:{alec:'',molly:''},bothell:{alec:'',molly:''},
-ebellevue:{alec:"It's like the Scottsdale of Seattle.",molly:''},redmond:{alec:'',molly:''},seattle:{alec:'',molly:''},shoreline:{alec:'My office. Do not move here, dirty and not a good area.',molly:''},
+ebellevue:{alec:"It's like the Scottsdale of Seattle. It's also my favorite city to hang out in.",molly:''},redmond:{alec:'',molly:''},seattle:{alec:'',molly:''},shoreline:{alec:'My office. Do not move here, dirty and not a good area.',molly:''},
 lfp:{alec:'',molly:''},kenmore:{alec:'',molly:''},lynnwood:{alec:'',molly:''},millcreek:{alec:'',molly:''},
 woodinville:{alec:'',molly:''},kirkland:{alec:'',molly:''},mercer:{alec:'',molly:''}};
 const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c]);
