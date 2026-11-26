@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Mom's Move: Seattle Area</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+/* VOICE: warm, clear, easy for Mom to read on a phone
+   IDEA: a folded regional road map with pins pushed into it
+   PICTURE: the satellite map itself, scrollable and zoomable, with coloured pins
+   COLOUR and TYPE: evergreen field, Sound blue, salmon accent; Figtree
+   LAYOUT: title band, big map, legend, then one card per area */
+:root{color-scheme:light dark;--bg:light-dark(#f6f8f5,#0b1a15);--ink:light-dark(#10241c,#e8f0ea);--muted:light-dark(#4d6359,#9fb5aa);--card:light-dark(#ffffff,#12261f);--line:light-dark(#d9e3dc,#24413a);--ever:#0f3b2e;--sea:#2b7bb9;--north:#7a5cc7;--east:#e0703f;--south:#d94f8a;--city:#2b7bb9;--accent:#f07a5a}
+:root[data-theme=light]{color-scheme:light}:root[data-theme=dark]{color-scheme:dark}
+*{box-sizing:border-box;min-width:0}
+body{margin:0;background:var(--bg);color:var(--ink);font:17px/1.55 Figtree,system-ui,sans-serif;overflow-x:clip}
+.band{padding:clamp(24px,4vw,56px) max(5vw,16px)}
+.top{background:var(--ever);color:#eef6f1;padding-bottom:20px}
+h1{font-size:clamp(32px,6vw,50px);line-height:1.05;margin:0 0 10px;font-weight:800;text-wrap:balance}
+.top p{margin:0;max-width:60ch;color:#c9ddd2}
+.wrap{max-width:1240px;margin:0 auto}
+.tools{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:18px 0 0}
+.chip{font:inherit;font-size:15px;min-height:44px;padding:0 16px;border-radius:999px;border:2px solid rgba(255,255,255,.35);background:transparent;color:#fff;cursor:pointer;display:inline-flex;align-items:center;gap:8px}
+.chip[aria-pressed=true]{background:#fff;color:var(--ever);border-color:#fff}
+.chip i,.dot{width:12px;height:12px;border-radius:50%;display:inline-block;flex:none}
+.mapband{background:var(--ever);padding:0 max(5vw,16px) clamp(24px,4vw,48px)}
+.mapbox{position:relative;max-width:1240px;margin:0 auto;border-radius:16px;overflow:hidden;box-shadow:0 10px 30px rgba(0,0,0,.35)}
+.viewport{height:min(78vh,820px);overflow:auto;-webkit-overflow-scrolling:touch;background:#0d2433;touch-action:pan-x pan-y}
+.canvas{position:relative;width:100%;transition:width .25s}
+.canvas img{display:block;width:100%;height:auto;user-select:none;-webkit-user-drag:none}
+.pin{position:absolute;transform:translate(-50%,-50%);width:44px;height:44px;border:0;background:none;padding:0;cursor:pointer}
+.pin span{position:absolute;inset:11px;border-radius:50%;border:3px solid #fff;box-shadow:0 2px 6px rgba(0,0,0,.6)}
+.pin span{display:grid;place-items:center;color:#fff;font-weight:800;font-size:13px}
+.pin.short span{inset:5px;font-size:15px}
+.canvas:not(.z) .pin:not(.short) b{display:none}
+.pin b{position:absolute;top:36px;left:50%;transform:translateX(-50%);white-space:nowrap;font-size:13px;font-weight:600;color:#fff;background:rgba(0,0,0,.6);padding:1px 7px;border-radius:6px;pointer-events:none}
+.pin.on span{inset:6px;border-width:4px;outline:3px solid var(--accent)}
+.pin.hide{display:none}
+.air{position:absolute;transform:translate(-50%,-50%);width:36px;height:36px;border-radius:50%;background:#1d4ed8;border:3px solid #fff;box-shadow:0 2px 6px rgba(0,0,0,.6);display:grid;place-items:center;pointer-events:none;z-index:1}
+.air svg{width:20px;height:20px}
+.air b{position:absolute;top:36px;left:50%;transform:translateX(-50%);white-space:nowrap;font-size:13px;font-weight:700;color:#fff;background:#1d4ed8;padding:1px 7px;border-radius:6px}
+.pin.r b{left:auto;right:4px;transform:none}
+.office{position:absolute;transform:translate(-50%,-50%);width:44px;height:44px;border:0;background:none;padding:0;cursor:pointer;z-index:2}
+.office svg{width:44px;height:44px;filter:drop-shadow(0 2px 4px rgba(0,0,0,.6))}
+.office b{position:absolute;top:40px;left:50%;transform:translateX(-50%);white-space:nowrap;font-size:13px;font-weight:800;color:#10241c;background:#ffd24a;padding:2px 8px;border-radius:6px;pointer-events:none}
+.offcard{display:flex;gap:14px;align-items:center;background:var(--card);border:2px solid #ffd24a;border-radius:16px;padding:16px 18px;margin-bottom:14px;cursor:pointer}
+.offcard svg{width:40px;height:40px;flex:none}
+.offcard p{margin:0}
+.zoom{position:absolute;right:12px;top:12px;display:flex;flex-direction:column;gap:6px}
+.zoom button{width:44px;height:44px;border-radius:12px;border:0;background:rgba(255,255,255,.92);color:#10241c;font:800 22px Figtree,sans-serif;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,.3)}
+.hint{color:#c9ddd2;font-size:14px;margin:10px auto 0;max-width:1240px}
+button:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+h2{font-size:26px;margin:0 0 6px;line-height:1.15}
+.sub{color:var(--muted);margin:0 0 20px}
+.legend{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(240px,100%),1fr));gap:12px;margin-bottom:8px}
+.lg{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px 16px}
+.lg strong{display:flex;align-items:center;gap:10px}
+.lg p{margin:4px 0 0;color:var(--muted);font-size:15px}
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(300px,100%),1fr));gap:14px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px;cursor:pointer;scroll-margin-top:20px;transition:box-shadow .2s,border-color .2s}
+.card.on{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent)}
+.card h3{margin:0;font-size:22px;display:flex;align-items:center;gap:10px}
+.meta{color:var(--muted);font-size:15px;margin:2px 0 12px}
+.row{display:flex;justify-content:space-between;gap:12px;border-top:1px solid var(--line);padding:8px 0;font-size:15px}
+.row span:last-child{font-weight:600;text-align:right;white-space:nowrap}
+.dot.num{width:26px;height:26px;display:inline-grid;place-items:center;color:#fff;font-size:14px;font-weight:800}
+.card:not(.sl) .dot.num{width:14px;height:14px}
+.desc{margin:0 0 12px;font-size:16px}
+.card.sl{border-width:2px}
+.notes{margin-top:8px;border:1.5px dashed var(--line);border-radius:10px;padding:10px 12px;color:var(--muted);font-size:15px}
+.card a{color:var(--sea);font-weight:600}
+footer{color:var(--muted);font-size:13px}
+@media(prefers-reduced-motion:reduce){.canvas,.card{transition:none}}
+</style></head><body>
+<header class="band top"><div class="wrap">
+<h1>Where should Mom live?</h1>
+<p>Eight shortlisted neighborhoods (numbered pins) plus other nearby towns, from Mill Creek down to Des Moines. The yellow star is Alec's office in Shoreline, and the blue plane pins are Sea-Tac and Paine Field airports. Scroll around the map, zoom in with the + button, and tap any pin to jump to its card below.</p>
+<div class="tools" id="filters" role="group" aria-label="Show areas">
+<button class="chip" aria-pressed="true" data-g="all">All areas</button>
+<button class="chip" aria-pressed="false" data-g="short">Shortlist (8)</button>
+<button class="chip" aria-pressed="false" data-g="city"><i style="background:var(--city)"></i>Seattle</button>
+<button class="chip" aria-pressed="false" data-g="north"><i style="background:var(--north)"></i>North end</button>
+<button class="chip" aria-pressed="false" data-g="east"><i style="background:var(--east)"></i>Eastside</button>
+<button class="chip" aria-pressed="false" data-g="south"><i style="background:var(--south)"></i>South end</button>
+</div></div></header>
+<section class="mapband" aria-label="Map">
+<div class="mapbox">
+<div class="viewport" id="vp"><div class="canvas" id="cv"><img src="map.jpg" width="2068" height="4756" alt="Satellite map of the Seattle area from Edmonds and Mill Creek down to Burien and Des Moines"></div></div>
+<div class="zoom"><button id="zin" aria-label="Zoom in">+</button><button id="zout" aria-label="Zoom out">−</button></div>
+</div>
+<p class="hint">Tip: drag or scroll inside the map to move around.</p>
+</section>
+<section class="band"><div class="wrap">
+<h2>Legend</h2>
+<p class="sub">Numbered pins are the shortlist. Small pins are other towns to compare. Colour shows the part of the region.</p>
+<div class="legend">
+<div class="lg"><strong><svg width="16" height="16" viewBox="0 0 24 24"><path d="M12 2l3 6.5 7 .8-5.2 4.8 1.5 7L12 17.5 5.7 21.1l1.5-7L2 9.3l7-.8z" fill="#ffd24a" stroke="#10241c" stroke-width="1.5"/></svg>Alec's office</strong><p>17544 Midvale Ave N, Shoreline.</p></div>
+<div class="lg"><strong><span class="dot" style="background:#1d4ed8;width:16px;height:16px;border:2px solid #fff;box-shadow:0 0 0 1px #1d4ed8"></span>Airports</strong><p>Sea-Tac (SEA) in the south, Paine Field (PAE) in Everett to the north.</p></div>
+<div class="lg"><strong><span class="dot" style="background:var(--city)"></span>Seattle</strong><p>West Seattle, Upper Queen Anne, downtown.</p></div>
+<div class="lg"><strong><span class="dot" style="background:var(--north)"></span>North end</strong><p>Edmonds, Shoreline, Lynnwood, Mill Creek, Lake Forest Park, Kenmore.</p></div>
+<div class="lg"><strong><span class="dot" style="background:var(--east)"></span>Eastside</strong><p>Bothell, East Bellevue, Downtown Redmond, Woodinville, Kirkland, Mercer Island.</p></div>
+<div class="lg"><strong><span class="dot" style="background:var(--south)"></span>South end</strong><p>Burien and Des Moines, along Puget Sound.</p></div>
+</div>
+</div></section>
+<section class="band" style="padding-top:0"><div class="wrap">
+<h2>The areas</h2>
+<p class="sub">Tap a card to find it on the map. Distances are straight lines to downtown Seattle and to Alec's office; driving takes longer.</p>
+<div class="offcard" id="offcard" tabindex="0"><svg viewBox="0 0 24 24"><path d="M12 2l3 6.5 7 .8-5.2 4.8 1.5 7L12 17.5 5.7 21.1l1.5-7L2 9.3l7-.8z" fill="#ffd24a" stroke="#10241c" stroke-width="1.2"/></svg><div><p><strong>Alec's office</strong></p><p style="color:var(--muted);font-size:15px">17544 Midvale Ave N, Shoreline, WA · <a href="https://maps.apple.com/?q=17544+Midvale+Ave+N,+Shoreline,+WA">Open in Maps</a></p></div></div>
+<div class="cards" id="cards"></div>
+<footer><p>Map imagery: Esri, Maxar, Earthstar Geographics. Pin locations are approximate. Notes for each area will be added here.</p></footer>
+</div></section>
+<script>
+{
+const A=[
+{id:'wseattle',k:1,n:'West Seattle',g:'city',lat:47.5612,lng:-122.387,c:'Seattle',d:'Quaint, small-town feel just across the bridge from downtown. The Junction makes errands easy on foot, and sunsets over Puget Sound from Alki are hard to beat.'},
+{id:'edmonds',k:2,n:'Edmonds',g:'north',lat:47.8105,lng:-122.379,c:'Snohomish County',d:'A quieter pace by the Sound. In the Bowl, neighborhood cafés, independent shops and galleries are close to the beach, marina and ferry.'},
+{id:'uqa',k:3,n:'Upper Queen Anne',g:'city',lat:47.6375,lng:-122.357,c:'Seattle',d:'Historic homes and skyline views give it hilltop charm. Near Queen Anne Avenue, boutiques, cafés and everyday essentials are close at hand.'},
+{id:'burien',k:4,n:'Burien',g:'south',lat:47.4697,lng:-122.3466,c:'King County',d:'Small-town feel south of Seattle, with independent restaurants and shops in Olde Burien. Seahurst Park brings wooded trails and saltwater beach close to home.'},
+{id:'bothell',k:5,n:'Bothell',g:'east',lat:47.7601,lng:-122.205,c:'King & Snohomish County',d:'Quieter residential streets with a walkable Main Street. Local cafés, restaurants and river trails make it easy to stay close to home and still have plenty to do.'},
+{id:'ebellevue',k:6,n:'East Bellevue',g:'east',lat:47.6185,lng:-122.1325,c:'King County',d:'Crossroads puts groceries and a wide range of restaurants within easy reach. Lake Hills has quieter residential streets and greenbelt trails, with Bellevue conveniences nearby.'},
+{id:'redmond',k:7,n:'Downtown Redmond',g:'east',lat:47.6735,lng:-122.123,c:'King County',d:'Everyday life is easy on foot, with shops, restaurants and trails nearby. Light rail connects the neighborhood to Bellevue and Seattle.'},
+{id:'desmoines',k:8,n:'Des Moines',g:'south',lat:47.4019,lng:-122.3245,c:'King County',d:'A slower pace along Puget Sound. Near the marina, waterfront walks, views of the Sound and a compact downtown are part of everyday life.'},
+{id:'seattle',n:'Downtown Seattle',g:'city',lat:47.6062,lng:-122.3321,c:'Seattle'},
+{id:'shoreline',n:'Shoreline',g:'north',lat:47.7465,lng:-122.322,c:'King County'},
+{id:'lfp',n:'Lake Forest Park',g:'north',lat:47.7568,lng:-122.2804,c:'King County'},
+{id:'kenmore',n:'Kenmore',g:'north',lat:47.7573,lng:-122.244,c:'King County'},
+{id:'lynnwood',n:'Lynnwood',g:'north',lat:47.8209,lng:-122.3151,c:'Snohomish County'},
+{id:'millcreek',n:'Mill Creek',g:'north',lat:47.8601,lng:-122.2043,c:'Snohomish County'},
+{id:'woodinville',n:'Woodinville',g:'east',lat:47.7543,lng:-122.1635,c:'King County'},
+{id:'kirkland',n:'Kirkland',g:'east',lat:47.6769,lng:-122.206,c:'King County'},
+{id:'mercer',n:'Mercer Island',g:'east',lat:47.5707,lng:-122.2221,c:'King County'}];
+const B={n:47.925,s:47.375,w:-122.43,e:-122.075},my=l=>{const r=l*Math.PI/180;return Math.log(Math.tan(r)+1/Math.cos(r))};
+const px=(lat,lng)=>({x:(lng-B.w)/(B.e-B.w)*100,y:(my(B.n)-my(lat))/(my(B.n)-my(B.s))*100});
+A.forEach(a=>Object.assign(a,px(a.lat,a.lng)));
+const C={city:'var(--city)',north:'var(--north)',east:'var(--east)',south:'var(--south)'};
+const GN={city:'Seattle',north:'North end',east:'Eastside',south:'South end'};
+const OF=Object.assign({lat:47.7571,lng:-122.344},px(47.7571,-122.344));
+const mi=(a,b,c,d)=>{const R=3958.8,r=Math.PI/180,dl=(c-a)*r,dg=(d-b)*r,h=Math.sin(dl/2)**2+Math.cos(a*r)*Math.cos(c*r)*Math.sin(dg/2)**2;return 2*R*Math.asin(Math.sqrt(h))};
+const cv=document.getElementById('cv'),vp=document.getElementById('vp'),cards=document.getElementById('cards');
+cv.insertAdjacentHTML('beforeend',A.map(a=>`<button class="pin${a.k?' short':''}${a.x>80?' r':''}" id="p-${a.id}" data-id="${a.id}" style="left:${a.x}%;top:${a.y}%" aria-label="${a.n}"><span style="background:${C[a.g]}">${a.k||''}</span><b>${a.n}</b></button>`).join(''));
+cv.insertAdjacentHTML('beforeend',`<button class="office" id="p-office" style="left:${OF.x}%;top:${OF.y}%" aria-label="Alec's office"><svg viewBox="0 0 24 24"><path d="M12 2l3 6.5 7 .8-5.2 4.8 1.5 7L12 17.5 5.7 21.1l1.5-7L2 9.3l7-.8z" fill="#ffd24a" stroke="#10241c" stroke-width="1.2"/></svg><b>Alec's office</b></button>`);
+const f=v=>v<1?'under 1 mi':v.toFixed(0)+' mi';
+const AP=[{id:'sea',n:'Sea-Tac Airport (SEA)',lat:47.4502,lng:-122.3088},{id:'pae',n:'Paine Field Airport (PAE)',lat:47.9063,lng:-122.2816}].map(a=>Object.assign(a,px(a.lat,a.lng)));
+cv.insertAdjacentHTML('beforeend',AP.map(a=>`<div class="air" style="left:${a.x}%;top:${a.y}%"><svg viewBox="0 0 24 24"><path d="M21 16v-2l-8-5V3.5a1.5 1.5 0 0 0-3 0V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5z" fill="#fff"/></svg><b>${a.n}</b></div>`).join(''));
+const near=(a)=>{const s=mi(a.lat,a.lng,AP[0].lat,AP[0].lng),p=mi(a.lat,a.lng,AP[1].lat,AP[1].lng);return s<=p?`Sea-Tac, ${f(s)}`:`Paine Field, ${f(p)}`};
+cards.innerHTML=A.map(a=>{const d=a.id==='seattle'?'—':mi(a.lat,a.lng,47.6062,-122.3321).toFixed(0)+' mi',o=f(mi(a.lat,a.lng,OF.lat,OF.lng));return `<article class="card${a.k?' sl':''}" id="c-${a.id}" data-id="${a.id}" data-g="${a.g}" tabindex="0"><h3><span class="dot num" style="background:${C[a.g]}">${a.k||''}</span>${a.n}</h3><p class="meta">${a.k?'On the shortlist · ':''}${GN[a.g]} · ${a.c}</p>${a.d?`<p class="desc">${a.d}</p>`:''}<div class="row"><span>To downtown Seattle</span><span>${d}</span></div><div class="row"><span>To Alec's office</span><span>${o}</span></div><div class="row"><span>Closest airport</span><span>${near(a)}</span></div><div class="row"><span>Rent &amp; prices</span><span>Coming soon</span></div><div class="notes">Notes coming soon</div><p style="margin:10px 0 0;font-size:15px"><a href="https://maps.apple.com/?q=${encodeURIComponent(a.n+', WA')}">Open in Maps</a></p></article>`}).join('');
+let z=1;const Z=[1,1.6,2.4,3.4];
+function setZ(nz,cx,cy){const w0=cv.offsetWidth,fx=(vp.scrollLeft+(cx??vp.clientWidth/2))/w0,fy=(vp.scrollTop+(cy??vp.clientHeight/2))/cv.offsetHeight;z=Math.max(0,Math.min(Z.length-1,nz));cv.style.transition='none';cv.style.width=Z[z]*100+'%';cv.classList.toggle('z',z>0);vp.scrollLeft=fx*cv.offsetWidth-(cx??vp.clientWidth/2);vp.scrollTop=fy*cv.offsetHeight-(cy??vp.clientHeight/2)}
+document.getElementById('zin').onclick=()=>setZ(z+1);
+document.getElementById('zout').onclick=()=>setZ(z-1);
+function select(id,from){document.querySelectorAll('.pin.on,.card.on').forEach(e=>e.classList.remove('on'));const p=document.getElementById('p-'+id),c=document.getElementById('c-'+id);p.classList.add('on');c.classList.add('on');
+if(from==='pin'){c.scrollIntoView({behavior:'smooth',block:'center'})}else{if(z<1)setZ(1);const a=A.find(v=>v.id===id);vp.scrollTo({left:a.x/100*cv.offsetWidth-vp.clientWidth/2,top:a.y/100*cv.offsetHeight-vp.clientHeight/2,behavior:'smooth'});vp.scrollIntoView({behavior:'smooth',block:'center'})}}
+function goOffice(){document.querySelectorAll('.pin.on,.card.on').forEach(e=>e.classList.remove('on'));vp.scrollTo({left:OF.x/100*cv.offsetWidth-vp.clientWidth/2,top:OF.y/100*cv.offsetHeight-vp.clientHeight/2,behavior:'smooth'});vp.scrollIntoView({behavior:'smooth',block:'center'})}
+document.getElementById('offcard').addEventListener('click',e=>{if(!e.target.closest('a'))goOffice()});
+document.getElementById('p-office').addEventListener('click',()=>document.getElementById('offcard').scrollIntoView({behavior:'smooth',block:'center'}));
+cv.addEventListener('click',e=>{const p=e.target.closest('.pin');if(p)select(p.dataset.id,'pin')});
+cards.addEventListener('click',e=>{if(e.target.closest('a'))return;const c=e.target.closest('.card');if(c)select(c.dataset.id,'card')});
+cards.addEventListener('keydown',e=>{if(e.key==='Enter'){const c=e.target.closest('.card');if(c)select(c.dataset.id,'card')}});
+/* drag to pan with a mouse */
+let drag=null;vp.addEventListener('mousedown',e=>{if(e.target.closest('.pin'))return;drag={x:e.clientX,y:e.clientY,l:vp.scrollLeft,t:vp.scrollTop};vp.style.cursor='grabbing';e.preventDefault()});
+window.addEventListener('mousemove',e=>{if(!drag)return;vp.scrollLeft=drag.l-(e.clientX-drag.x);vp.scrollTop=drag.t-(e.clientY-drag.y)});
+window.addEventListener('mouseup',()=>{drag=null;vp.style.cursor=''});
+vp.style.cursor='grab';
+document.getElementById('filters').addEventListener('click',e=>{const b=e.target.closest('.chip');if(!b)return;const g=b.dataset.g;document.querySelectorAll('.chip').forEach(c=>c.setAttribute('aria-pressed',c===b));
+A.forEach(a=>{const show=g==='all'||a.g===g||(g==='short'&&a.k);document.getElementById('p-'+a.id).classList.toggle('hide',!show);document.getElementById('c-'+a.id).style.display=show?'':'none'})});
+}
+</script></body></html>
