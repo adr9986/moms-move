@@ -80,6 +80,8 @@ h2{font-size:26px;margin:0 0 6px;line-height:1.15}
 .nt{margin-top:10px;border-radius:10px;padding:10px 12px;background:light-dark(#f1f5f2,#183229)}
 .nt h4{margin:0 0 2px;font-size:15px}
 .nt p{margin:0;font-size:15px}
+.nt ul{margin:2px 0 0;padding-left:20px;font-size:15px}
+.nt li{margin:2px 0}
 .nt .empty{color:var(--muted);font-style:italic}
 .notes{margin-top:8px;border:1.5px dashed var(--line);border-radius:10px;padding:10px 12px;color:var(--muted);font-size:15px}
 .card a{color:var(--sea);font-weight:600}
@@ -141,14 +143,14 @@ const A=[
 const B={n:47.925,s:47.375,w:-122.43,e:-122.075},my=l=>{const r=l*Math.PI/180;return Math.log(Math.tan(r)+1/Math.cos(r))};
 const px=(lat,lng)=>({x:(lng-B.w)/(B.e-B.w)*100,y:(my(B.n)-my(lat))/(my(B.n)-my(B.s))*100});
 A.forEach(a=>Object.assign(a,px(a.lat,a.lng)));
-/* Notes: fill in alec / molly for each area id. Use \n for a new line. */
+/* Notes: alec / molly for each area id. Use a list ['point one','point two'] for bullet points. */
 const N={
 wseattle:{alec:'',molly:''},edmonds:{alec:'',molly:''},uqa:{alec:'',molly:''},bothell:{alec:'',molly:''},
-ebellevue:{alec:"It's like the Scottsdale of Seattle. It's also my favorite city to hang out in.",molly:''},redmond:{alec:'',molly:''},seattle:{alec:'',molly:''},shoreline:{alec:'My office. Do not move here, dirty and not a good area.',molly:''},
+ebellevue:{alec:["It's like the Scottsdale of Seattle",'My favorite city to hang out in','Less chaotic than Seattle','Cleaner, nicer city','Better parking'],molly:''},redmond:{alec:'',molly:''},seattle:{alec:'',molly:''},shoreline:{alec:['My office','Do not move here, dirty and not a good area'],molly:''},
 lfp:{alec:'',molly:''},kenmore:{alec:'',molly:''},lynnwood:{alec:'',molly:''},millcreek:{alec:'',molly:''},
 woodinville:{alec:'',molly:''},kirkland:{alec:'',molly:''},mercer:{alec:'',molly:''}};
 const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c]);
-const note=s=>s?`<p>${esc(s).replace(/\n/g,'<br>')}</p>`:'<p class="empty">Coming soon</p>';
+const note=s=>{const l=(Array.isArray(s)?s:(s?[s]:[])).filter(Boolean);return l.length?`<ul>${l.map(x=>`<li>${esc(x)}</li>`).join('')}</ul>`:'<p class="empty">Coming soon</p>'};
 /* Rent: Rentometer average rents (2-bed apartment, 2-bed house), by city or ZIP; 'as' = data date */
 const RENT={
 wseattle:{apt:2974,house:3254,as:'Jan 2026',b:'ZIP 98116',u:'zipcode/98116'},
