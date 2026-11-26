@@ -32,14 +32,21 @@ h1{font-size:clamp(32px,6vw,50px);line-height:1.05;margin:0 0 10px;font-weight:8
 .pin span{position:absolute;inset:11px;border-radius:50%;border:3px solid #fff;box-shadow:0 2px 6px rgba(0,0,0,.6)}
 .pin span{display:grid;place-items:center;color:#fff;font-weight:800;font-size:13px}
 .pin.short span{inset:5px;font-size:15px}
-.canvas:not(.z) .pin:not(.short) b{display:none}
 .pin b{position:absolute;top:36px;left:50%;transform:translateX(-50%);white-space:nowrap;font-size:13px;font-weight:600;color:#fff;background:rgba(0,0,0,.6);padding:1px 7px;border-radius:6px;pointer-events:none}
 .pin.on span{inset:6px;border-width:4px;outline:3px solid var(--accent)}
 .pin.hide{display:none}
 .air{position:absolute;transform:translate(-50%,-50%);width:36px;height:36px;border-radius:50%;background:#1d4ed8;border:3px solid #fff;box-shadow:0 2px 6px rgba(0,0,0,.6);display:grid;place-items:center;pointer-events:none;z-index:1}
 .air svg{width:20px;height:20px}
 .air b{position:absolute;top:36px;left:50%;transform:translateX(-50%);white-space:nowrap;font-size:13px;font-weight:700;color:#fff;background:#1d4ed8;padding:1px 7px;border-radius:6px}
-.pin.r b{left:auto;right:4px;transform:none}
+.canvas [data-p]>b{right:auto;bottom:auto}
+.canvas [data-p=b]>b{top:calc(100% - 6px);left:50%;transform:translateX(-50%)}
+.canvas [data-p=t]>b{top:auto;bottom:calc(100% - 6px);left:50%;transform:translateX(-50%)}
+.canvas [data-p=r]>b{top:50%;left:calc(100% - 4px);transform:translateY(-50%)}
+.canvas [data-p=l]>b{top:50%;left:auto;right:calc(100% - 4px);transform:translateY(-50%)}
+.canvas [data-p=tr]>b{top:auto;bottom:calc(100% - 8px);left:60%;transform:none}
+.canvas [data-p=tl]>b{top:auto;bottom:calc(100% - 8px);left:auto;right:60%;transform:none}
+.canvas [data-p=br]>b{top:calc(100% - 8px);left:60%;transform:none}
+.canvas [data-p=bl]>b{top:calc(100% - 8px);left:auto;right:60%;transform:none}
 .office{position:absolute;transform:translate(-50%,-50%);width:44px;height:44px;border:0;background:none;padding:0;cursor:pointer;z-index:2}
 .office svg{width:44px;height:44px;filter:drop-shadow(0 2px 4px rgba(0,0,0,.6))}
 .office b{position:absolute;top:40px;left:50%;transform:translateX(-50%);white-space:nowrap;font-size:13px;font-weight:800;color:#10241c;background:#ffd24a;padding:2px 8px;border-radius:6px;pointer-events:none}
@@ -67,6 +74,8 @@ h2{font-size:26px;margin:0 0 6px;line-height:1.15}
 .card:not(.sl) .dot.num{width:14px;height:14px}
 .desc{margin:0 0 12px;font-size:16px}
 .card.sl{border-width:2px}
+.src{margin:2px 0 4px;font-size:13px;color:var(--muted)}
+.src a{font-weight:400}
 .nt{margin-top:10px;border-radius:10px;padding:10px 12px;background:light-dark(#f1f5f2,#183229)}
 .nt h4{margin:0 0 2px;font-size:15px}
 .nt p{margin:0;font-size:15px}
@@ -106,7 +115,7 @@ footer{color:var(--muted);font-size:13px}
 </div></section>
 <section class="band" style="padding-top:0"><div class="wrap">
 <h2>The areas</h2>
-<p class="sub">Tap a card to find it on the map. Distances are straight lines to downtown Seattle and to Alec's office; driving takes longer.</p>
+<p class="sub">Rents are average monthly asking rents from Rentometer for that city or ZIP code. Upper Queen Anne, Downtown Seattle and East Bellevue use the city-wide average, so real prices there may differ. Tap a card to find it on the map. Distances are straight lines to downtown Seattle and to Alec's office; driving takes longer.</p>
 <div class="offcard" id="offcard" tabindex="0"><svg viewBox="0 0 24 24"><path d="M12 2l3 6.5 7 .8-5.2 4.8 1.5 7L12 17.5 5.7 21.1l1.5-7L2 9.3l7-.8z" fill="#ffd24a" stroke="#10241c" stroke-width="1.2"/></svg><div><p><strong>Alec's office</strong></p><p style="color:var(--muted);font-size:15px">17544 Midvale Ave N, Shoreline, WA · <a href="https://maps.apple.com/?q=17544+Midvale+Ave+N,+Shoreline,+WA">Open in Maps</a></p></div></div>
 <div class="cards" id="cards"></div>
 <footer><p>Map imagery: Esri, Maxar, Earthstar Geographics. Pin locations are approximate. </p></footer>
@@ -114,13 +123,13 @@ footer{color:var(--muted);font-size:13px}
 <script>
 {
 const A=[
-{id:'wseattle',k:1,n:'West Seattle',g:'city',lat:47.5612,lng:-122.387,c:'Seattle',d:'Quaint, small-town feel just across the bridge from downtown. The Junction makes errands easy on foot, and sunsets over Puget Sound from Alki are hard to beat.'},
+{id:'wseattle',k:1,n:'West Seattle',g:'city',lat:47.5612,lng:-122.387,c:'King County',d:'Quaint, small-town feel just across the bridge from downtown. The Junction makes errands easy on foot, and sunsets over Puget Sound from Alki are hard to beat.'},
 {id:'edmonds',k:2,n:'Edmonds',g:'north',lat:47.8105,lng:-122.379,c:'Snohomish County',d:'A quieter pace by the Sound. In the Bowl, neighborhood cafés, independent shops and galleries are close to the beach, marina and ferry.'},
-{id:'uqa',k:3,n:'Upper Queen Anne',g:'city',lat:47.6375,lng:-122.357,c:'Seattle',d:'Historic homes and skyline views give it hilltop charm. Near Queen Anne Avenue, boutiques, cafés and everyday essentials are close at hand.'},
+{id:'uqa',k:3,n:'Upper Queen Anne',g:'city',lat:47.6375,lng:-122.357,c:'King County',d:'Historic homes and skyline views give it hilltop charm. Near Queen Anne Avenue, boutiques, cafés and everyday essentials are close at hand.'},
 {id:'bothell',k:4,n:'Bothell',g:'east',lat:47.7601,lng:-122.205,c:'King & Snohomish County',d:'Quieter residential streets with a walkable Main Street. Local cafés, restaurants and river trails make it easy to stay close to home and still have plenty to do.'},
 {id:'ebellevue',k:5,n:'East Bellevue',g:'east',lat:47.6185,lng:-122.1325,c:'King County',d:'Crossroads puts groceries and a wide range of restaurants within easy reach. Lake Hills has quieter residential streets and greenbelt trails, with Bellevue conveniences nearby.'},
 {id:'redmond',k:6,n:'Downtown Redmond',g:'east',lat:47.6735,lng:-122.123,c:'King County',d:'Everyday life is easy on foot, with shops, restaurants and trails nearby. Light rail connects the neighborhood to Bellevue and Seattle.'},
-{id:'seattle',n:'Downtown Seattle',g:'city',lat:47.6062,lng:-122.3321,c:'Seattle'},
+{id:'seattle',n:'Downtown Seattle',g:'city',lat:47.6062,lng:-122.3321,c:'King County'},
 {id:'shoreline',n:'Shoreline',g:'north',lat:47.7465,lng:-122.322,c:'King County'},
 {id:'lfp',n:'Lake Forest Park',g:'north',lat:47.7568,lng:-122.2804,c:'King County'},
 {id:'kenmore',n:'Kenmore',g:'north',lat:47.7573,lng:-122.244,c:'King County'},
@@ -135,23 +144,41 @@ A.forEach(a=>Object.assign(a,px(a.lat,a.lng)));
 /* Notes: fill in alec / molly for each area id. Use \n for a new line. */
 const N={
 wseattle:{alec:'',molly:''},edmonds:{alec:'',molly:''},uqa:{alec:'',molly:''},bothell:{alec:'',molly:''},
-ebellevue:{alec:"It's like the Scottsdale of Seattle.",molly:''},redmond:{alec:'',molly:''},seattle:{alec:'',molly:''},shoreline:{alec:'',molly:''},
+ebellevue:{alec:"It's like the Scottsdale of Seattle.",molly:''},redmond:{alec:'',molly:''},seattle:{alec:'',molly:''},shoreline:{alec:'My office. Do not move here, dirty and not a good area.',molly:''},
 lfp:{alec:'',molly:''},kenmore:{alec:'',molly:''},lynnwood:{alec:'',molly:''},millcreek:{alec:'',molly:''},
 woodinville:{alec:'',molly:''},kirkland:{alec:'',molly:''},mercer:{alec:'',molly:''}};
 const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c]);
 const note=s=>s?`<p>${esc(s).replace(/\n/g,'<br>')}</p>`:'<p class="empty">Coming soon</p>';
+/* Rent: Rentometer average rents (2-bed apartment, 2-bed house), by city or ZIP; 'as' = data date */
+const RENT={
+wseattle:{apt:2974,house:3254,as:'Jan 2026',b:'ZIP 98116',u:'zipcode/98116'},
+edmonds:{apt:2190,house:2361,as:'Jan 2026',b:'Edmonds',u:'wa/edmonds-wa'},
+uqa:{apt:3176,house:2879,as:'Jan 2026',b:'Seattle-wide average',u:'wa/seattle-wa'},
+bothell:{apt:2762,house:2696,as:'Dec 2025',b:'Bothell',u:'wa/bothell-wa'},
+ebellevue:{apt:3392,house:3404,as:'Dec 2025',b:'Bellevue-wide average',u:'wa/bellevue-wa'},
+redmond:{apt:3323,house:2948,as:'Feb 2026',b:'ZIP 98052',u:'zipcode/98052'},
+seattle:{apt:3176,house:2879,as:'Jan 2026',b:'Seattle-wide average',u:'wa/seattle-wa'},
+shoreline:{apt:2451,house:2531,as:'Feb 2026',b:'Shoreline',u:'wa/shoreline-wa'},
+lfp:{apt:2289,house:2920,as:'Feb 2026',b:'Lake Forest Park',u:'wa/lake-forest-park-wa'},
+kenmore:{apt:2370,house:2389,as:'Feb 2026',b:'Kenmore',u:'wa/kenmore-wa'},
+lynnwood:{apt:2227,house:2146,as:'Jun 2026',b:'Lynnwood',u:'wa/lynnwood-wa'},
+millcreek:{apt:2278,house:2730,as:'Jun 2026',b:'Mill Creek',u:'wa/mill-creek-wa'},
+woodinville:{apt:3227,house:2681,as:'Mar 2026',b:'ZIP 98072',u:'zipcode/98072'},
+kirkland:{apt:3253,house:3810,as:'Nov 2025',b:'Kirkland',u:'wa/kirkland-wa'},
+mercer:{apt:3415,house:4937,as:'Oct 2025',b:'Mercer Island',u:'wa/mercer-island-wa'}};
+const usd=n=>'$'+n.toLocaleString('en-US')+'/mo';
 const C={city:'var(--city)',north:'var(--north)',east:'var(--east)',south:'var(--south)'};
 const GN={city:'Seattle',north:'North end',east:'Eastside',south:'South end'};
 const OF=Object.assign({lat:47.7571,lng:-122.344},px(47.7571,-122.344));
 const mi=(a,b,c,d)=>{const R=3958.8,r=Math.PI/180,dl=(c-a)*r,dg=(d-b)*r,h=Math.sin(dl/2)**2+Math.cos(a*r)*Math.cos(c*r)*Math.sin(dg/2)**2;return 2*R*Math.asin(Math.sqrt(h))};
 const cv=document.getElementById('cv'),vp=document.getElementById('vp'),cards=document.getElementById('cards');
-cv.insertAdjacentHTML('beforeend',A.map(a=>`<button class="pin${a.k?' short':''}${a.x>80?' r':''}" id="p-${a.id}" data-id="${a.id}" style="left:${a.x}%;top:${a.y}%" aria-label="${a.n}"><span style="background:${C[a.g]}">${a.k||''}</span><b>${a.n}</b></button>`).join(''));
+cv.insertAdjacentHTML('beforeend',A.map(a=>`<button class="pin${a.k?' short':''}" id="p-${a.id}" data-id="${a.id}" style="left:${a.x}%;top:${a.y}%" aria-label="${a.n}"><span style="background:${C[a.g]}">${a.k||''}</span><b>${a.n}</b></button>`).join(''));
 cv.insertAdjacentHTML('beforeend',`<button class="office" id="p-office" style="left:${OF.x}%;top:${OF.y}%" aria-label="Alec's office"><svg viewBox="0 0 24 24"><path d="M12 2l3 6.5 7 .8-5.2 4.8 1.5 7L12 17.5 5.7 21.1l1.5-7L2 9.3l7-.8z" fill="#ffd24a" stroke="#10241c" stroke-width="1.2"/></svg><b>Alec's office</b></button>`);
 const f=v=>v<1?'under 1 mi':v.toFixed(0)+' mi';
 const AP=[{id:'sea',n:'Sea-Tac Airport (SEA)',lat:47.4502,lng:-122.3088},{id:'pae',n:'Paine Field Airport (PAE)',lat:47.9063,lng:-122.2816}].map(a=>Object.assign(a,px(a.lat,a.lng)));
 cv.insertAdjacentHTML('beforeend',AP.map(a=>`<div class="air" style="left:${a.x}%;top:${a.y}%"><svg viewBox="0 0 24 24"><path d="M21 16v-2l-8-5V3.5a1.5 1.5 0 0 0-3 0V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5z" fill="#fff"/></svg><b>${a.n}</b></div>`).join(''));
 const near=(a)=>{const s=mi(a.lat,a.lng,AP[0].lat,AP[0].lng),p=mi(a.lat,a.lng,AP[1].lat,AP[1].lng);return s<=p?`Sea-Tac, ${f(s)}`:`Paine Field, ${f(p)}`};
-cards.innerHTML=A.map(a=>{const d=a.id==='seattle'?'—':mi(a.lat,a.lng,47.6062,-122.3321).toFixed(0)+' mi',o=f(mi(a.lat,a.lng,OF.lat,OF.lng));return `<article class="card${a.k?' sl':''}" id="c-${a.id}" data-id="${a.id}" data-g="${a.g}" tabindex="0"><h3><span class="dot num" style="background:${C[a.g]}">${a.k||''}</span>${a.n}</h3><p class="meta">${a.k?'On the shortlist · ':''}${GN[a.g]} · ${a.c}</p>${a.d?`<p class="desc">${a.d}</p>`:''}<div class="row"><span>To downtown Seattle</span><span>${d}</span></div><div class="row"><span>To Alec's office</span><span>${o}</span></div><div class="row"><span>Closest airport</span><span>${near(a)}</span></div><div class="row"><span>Rent &amp; prices</span><span>Coming soon</span></div><div class="nt"><h4>Alec's notes</h4>${note(N[a.id]?.alec)}</div><div class="nt"><h4>Molly's notes</h4>${note(N[a.id]?.molly)}</div><p style="margin:10px 0 0;font-size:15px"><a href="https://maps.apple.com/?q=${encodeURIComponent(a.n+', WA')}">Open in Maps</a></p></article>`}).join('');
+cards.innerHTML=A.map(a=>{const d=a.id==='seattle'?'—':mi(a.lat,a.lng,47.6062,-122.3321).toFixed(0)+' mi',o=f(mi(a.lat,a.lng,OF.lat,OF.lng));return `<article class="card${a.k?' sl':''}" id="c-${a.id}" data-id="${a.id}" data-g="${a.g}" tabindex="0"><h3><span class="dot num" style="background:${C[a.g]}">${a.k||''}</span>${a.n}</h3><p class="meta">${a.k?'On the shortlist · ':''}${GN[a.g]} · ${a.c}</p>${a.d?`<p class="desc">${a.d}</p>`:''}<div class="row"><span>To downtown Seattle</span><span>${d}</span></div><div class="row"><span>To Alec's office</span><span>${o}</span></div><div class="row"><span>Closest airport</span><span>${near(a)}</span></div><div class="row"><span>2-bed apartment rent</span><span>${usd(RENT[a.id].apt)}</span></div><div class="row"><span>2-bed house rent</span><span>${usd(RENT[a.id].house)}</span></div><p class="src">Average rents from <a href="https://www.rentometer.com/average-rent-in/${RENT[a.id].u}">Rentometer</a> · ${RENT[a.id].b} · ${RENT[a.id].as}</p><div class="nt"><h4>Alec's notes</h4>${note(N[a.id]?.alec)}</div><div class="nt"><h4>Molly's notes</h4>${note(N[a.id]?.molly)}</div><p style="margin:10px 0 0;font-size:15px"><a href="https://maps.apple.com/?q=${encodeURIComponent(a.n+', WA')}">Open in Maps</a></p></article>`}).join('');
 let z=1;const Z=[1,1.6,2.4,3.4];
 function setZ(nz,cx,cy){const w0=cv.offsetWidth,fx=(vp.scrollLeft+(cx??vp.clientWidth/2))/w0,fy=(vp.scrollTop+(cy??vp.clientHeight/2))/cv.offsetHeight;z=Math.max(0,Math.min(Z.length-1,nz));cv.style.transition='none';cv.style.width=Z[z]*100+'%';cv.classList.toggle('z',z>0);vp.scrollLeft=fx*cv.offsetWidth-(cx??vp.clientWidth/2);vp.scrollTop=fy*cv.offsetHeight-(cy??vp.clientHeight/2)}
 document.getElementById('zin').onclick=()=>setZ(z+1);
@@ -169,7 +196,18 @@ let drag=null;vp.addEventListener('mousedown',e=>{if(e.target.closest('.pin'))re
 window.addEventListener('mousemove',e=>{if(!drag)return;vp.scrollLeft=drag.l-(e.clientX-drag.x);vp.scrollTop=drag.t-(e.clientY-drag.y)});
 window.addEventListener('mouseup',()=>{drag=null;vp.style.cursor=''});
 vp.style.cursor='grab';
+function place(){const box=cv.getBoundingClientRect(),els=[...cv.querySelectorAll('#p-office,.pin.short:not(.hide),.air,.pin:not(.short):not(.hide)')],pad=3,P=['b','t','r','l','br','bl','tr','tl'];
+const hit=(a,b)=>a.left<b.right+pad&&a.right+pad>b.left&&a.top<b.bottom+pad&&a.bottom+pad>b.top;
+const dots=els.map(e=>(e.querySelector('span,svg')||e).getBoundingClientRect());
+const lab=e=>e.querySelector('b').getBoundingClientRect();
+els.forEach(e=>e.dataset.p='b');
+for(let round=0;round<4;round++){let moved=0;for(const e of els){const others=els.filter(o=>o!==e).map(lab);let best=e.dataset.p,bs=1e9;
+for(const p of P){e.dataset.p=p;const r=lab(e);let s=dots.filter(u=>hit(r,u)).length*10+others.filter(u=>hit(r,u)).length*10+P.indexOf(p)*.1;
+if(r.left<box.left||r.right>box.right||r.top<box.top||r.bottom>box.bottom)s+=25;if(s<bs){bs=s;best=p}}
+if(e.dataset.p!==best)moved++;e.dataset.p=best}if(!moved)break}}
+const ro=new ResizeObserver(()=>place());ro.observe(cv);
+if(vp.clientWidth<600){const img=cv.querySelector('img'),go=()=>{setZ(1);vp.scrollLeft=(cv.offsetWidth-vp.clientWidth)/2;vp.scrollTop=cv.offsetHeight*0.22};img.complete?go():img.addEventListener('load',go,{once:true})}
 document.getElementById('filters').addEventListener('click',e=>{const b=e.target.closest('.chip');if(!b)return;const g=b.dataset.g;document.querySelectorAll('.chip').forEach(c=>c.setAttribute('aria-pressed',c===b));
-A.forEach(a=>{const show=g==='all'||a.g===g||(g==='short'&&a.k);document.getElementById('p-'+a.id).classList.toggle('hide',!show);document.getElementById('c-'+a.id).style.display=show?'':'none'})});
+A.forEach(a=>{const show=g==='all'||a.g===g||(g==='short'&&a.k);document.getElementById('p-'+a.id).classList.toggle('hide',!show);document.getElementById('c-'+a.id).style.display=show?'':'none'});place()});
 }
 </script></body></html>
